@@ -1,3 +1,37 @@
+# Системные конфиги и временные файлы
 /config.local
 /tmp
 /cache
+.DS_Store
+Thumbs.db
+
+# Виртуальное окружение (Никогда не пушим в Git)
+auto_1_venv/
+venv/
+env/
+.env
+
+# Кэш Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Данные (Управляются через DVC)
+# Мы игнорируем сами CSV файлы, но оставляем .dvc файлы и конфиги
+data/raw/*.csv
+data/processed/*.csv
+!data/.gitignore
+
+# Модели и артефакты обучения
+models/*.pkl
+models/*.joblib
+roc_curve.png
+
+# MLflow (Локальные логи и база данных)
+mlruns/
+mlflow.db
+
+# Расширения для IDE
+.vscode/
+.idea/

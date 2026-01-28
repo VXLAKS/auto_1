@@ -1,0 +1,37 @@
+name: ML Pipeline CI
+
+on: [push]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+        
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    # В реальном проекте здесь нужно скачать данные из DVC remote
+    # Но для учебного проекта мы пропустим шаг с dvc pull для данных,
+    # если данные не залиты в облако.
+    # Если данные маленькие и лежат в git (не рекомендуется, но работает), то:
+    
+    - name: Run Data Validation
+      # Для CI теста нужны данные. Если их нет в репо, этот шаг упадет.
+      # Можно создать dummy данные прямо здесь для теста
+      run: |
+         python -c "import pandas as pd; pd.DataFrame({'LIMIT_BAL':[1000], 'SEX':[1], 'EDUCATION':[1], 'MARRIAGE':[1], 'AGE':[30], 'target':[0], 'PAY_0':[0]}).to_csv('data/processed/train.csv', index=False)"
+         # python src/data/validation.py  <-- раскомментируй если настроен dvc remote
+
+    - name: Build Docker Image
+      run: docker build -t scoring-api .

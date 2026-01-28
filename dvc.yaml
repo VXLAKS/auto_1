@@ -1,0 +1,24 @@
+stages:
+  prepare:
+    cmd: python src/data/make_dataset.py
+    deps:
+      - data/raw/UCI_Credit_Card.csv
+      - src/data/make_dataset.py
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  validate:
+    cmd: python src/data/validation.py
+    deps:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - src/data/validation.py
+
+  train:
+    cmd: python src/models/train.py
+    deps:
+      - data/processed/train.csv
+      - src/models/train.py
+    outs:
+      - models/model.pkl

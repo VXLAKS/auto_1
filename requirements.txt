@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+mlflow
+dvc
+great_expectations
+fastapi
+uvicorn
+pytest
+flake8
+joblib
+matplotlib
+httpx
