@@ -1,37 +1,67 @@
 name: ML Pipeline CI
 
-on: [push]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9
-        
+        python-version: '3.10'
+
     - name: Install dependencies
-      run: pip install -r requirements.txt
-      
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8  # На случай, если его нет в requirements
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
+        # Останавливаем сборку, если есть критические ошибки синтаксиса
         flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
-        
-    # В реальном проекте здесь нужно скачать данные из DVC remote
-    # Но для учебного проекта мы пропустим шаг с dvc pull для данных,
-    # если данные не залиты в облако.
-    # Если данные маленькие и лежат в git (не рекомендуется, но работает), то:
-    
-    - name: Run Data Validation
-      # Для CI теста нужны данные. Если их нет в репо, этот шаг упадет.
-      # Можно создать dummy данные прямо здесь для теста
+        # Выводим предупреждения для остального (не ломая билд)
+        flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Create data directories
+      # Создаем структуру папок, которую ожидают скрипты
+      run: mkdir -p data/raw data/processed models
+
+    - name: Run Data Validation Test
+      # Генерируем минимальные корректные данные и запускаем твой скрипт валидации
       run: |
-         python -c "import pandas as pd; pd.DataFrame({'LIMIT_BAL':[1000], 'SEX':[1], 'EDUCATION':[1], 'MARRIAGE':[1], 'AGE':[30], 'target':[0], 'PAY_0':[0]}).to_csv('data/processed/train.csv', index=False)"
-         # python src/data/validation.py  <-- раскомментируй если настроен dvc remote
+        python -c "import pandas as pd; pd.DataFrame({
+            'LIMIT_BAL': [10000.0, 20000.0],
+            'SEX': [1, 2],
+            'EDUCATION': [1, 2],
+            'MARRIAGE': [1, 2],
+            'AGE': [30, 40],
+            'PAY_0': [0, 0],
+            'target': [0, 1]
+        }).to_csv('data/processed/train.csv', index=False)"
+        
+        python -c "import pandas as pd; pd.DataFrame({
+            'LIMIT_BAL': [5000.0],
+            'SEX': [1],
+            'EDUCATION': [2],
+            'MARRIAGE': [1],
+            'AGE': [25],
+            'PAY_0': [-1],
+            'target': [0]
+        }).to_csv('data/processed/test.csv', index=False)"
+        
+        # Теперь запускаем твой файл валидации
+        python src/data/validation.py
 
     - name: Build Docker Image
-      run: docker build -t scoring-api .
+      # Проверяем, что Dockerfile корректен и образ собирается
+      run: docker build -t scoring-app:latest .
