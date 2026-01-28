@@ -11,3 +11,4 @@ flake8
 joblib
 matplotlib
 httpx
+pandera
