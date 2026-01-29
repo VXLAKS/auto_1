@@ -18,9 +18,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install "numpy<2.0.0"
-        pip install pandas scikit-learn onnxruntime evidently
+        # Добавляем dvc[gdrive] или [s3] в зависимости от вашего облака
+        pip install "numpy<2.0.0" pandas scikit-learn onnxruntime evidently dvc[gdrive]
         
+    # Шаг для скачивания данных, иначе check_drift.py нечего будет проверять
+    - name: Pull Data with DVC
+      env:
+        # Убедитесь, что этот секрет добавлен в Settings -> Secrets and variables -> Actions
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+      run: dvc pull
+
     - name: Lint with flake8
       run: |
         pip install flake8

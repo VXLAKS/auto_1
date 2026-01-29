@@ -16,4 +16,4 @@ pandera
 torch
 onnx
 onnxruntime
-evidently
+evidently>=0.4.0
