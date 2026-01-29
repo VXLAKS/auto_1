@@ -1,7 +1,17 @@
 import pandas as pd
 import os
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
+import sys
+
+try:
+    from evidently.report import Report
+    from evidently.metric_preset import DataDriftPreset
+    print("✅ Evidently imports successful")
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    print("Попытка альтернативного импорта...")
+    # В некоторых версиях используется другой путь
+    from evidently.model_monitoring import Report
+    from evidently.metrics import DataDriftPreset
 
 def run_drift_report():
     print(" Анализ дрифта данных...")
