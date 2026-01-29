@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credit-scoring-api
+  labels:
+    app: scoring
+spec:
+  replicas: 3  # Запускаем 3 копии для отказоустойчивости
+  selector:
+    matchLabels:
+      app: scoring
+  template:
+    metadata:
+      labels:
+        app: scoring
+    spec:
+      containers:
+      - name: api-container
+        image: vxlaks/auto-1-api:latest # Твой будущий образ
+        ports:
+        - containerPort: 8000
+        # Проверка, что приложение живое
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # Ограничение ресурсов (важно для K8s)
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"

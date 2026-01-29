@@ -1,0 +1,28 @@
+name: ML Industrial Pipeline
+
+on:
+  push:
+    branches: [ industrial-deploy ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        pip install torch onnxruntime pandas scikit-learn evidently
+        
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run Drift Check
+      run: python scripts/check_drift.py

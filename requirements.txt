@@ -12,3 +12,7 @@ joblib
 matplotlib
 httpx
 pandera
+torch
+onnx
+onnxruntime
+evidently
