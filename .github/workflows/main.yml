@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install "numpy<2.0.0" pandas scikit-learn onnxruntime evidently
+        pip install "numpy<2.0.0" "pyarrow<23.0.0" pandas scikit-learn onnxruntime evidently==0.6.0
         
     - name: Mocking environment
       run: |
